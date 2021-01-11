@@ -1,6 +1,15 @@
+server:
+  port: 443
+  ssl:
+    key-store: /Users/xiaomingcong/workspace/apache-tomcat-8.5.56-cas/conf/localhost-rsa2.jks
+    key-store-password: 123456
+    key-store-type: PKCS12
+    keyAlias: client
+condition:
+  http2https: true
+http:
+  port: 8888
 spring:
-  profiles:
-    active: https,cas
   datasource:
     url: jdbc:mysql://localhost:3306/OnlineStitchingSupermarket?characterEncoding=utf8&useUnicode=true&useSSL=false&serverTimezone=GMT%2B8&useSSL=false
     username: root
@@ -12,6 +21,3 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-logging:
-  level:
-    root: debug

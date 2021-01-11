@@ -28,6 +28,22 @@ public class HelloController {
         return "post Hello!";
     }
 
+//    @GetMapping("/")
+//    public String app(){
+//        return "hello";
+//    }
+
+    @ApiOperation(value="home")
+    @GetMapping("/home")
+    public String home(){
+        return "home";
+    }
+
+    @ApiOperation(value="failure")
+    @GetMapping("/failure")
+    public String failure(){
+        return "failure";
+    }
 
     @Autowired
     GoodsRepository goodsRepository;
