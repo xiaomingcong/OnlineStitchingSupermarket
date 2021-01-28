@@ -2,6 +2,7 @@ package com.xmc.config;
 
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,6 +24,7 @@ import java.util.List;
  * Version 1.0
  */
 //@Component
+//@Profile("nocas")
 public class MyProviderManager extends ProviderManager {
 
     private List<AuthenticationProvider> providers = Collections.emptyList();

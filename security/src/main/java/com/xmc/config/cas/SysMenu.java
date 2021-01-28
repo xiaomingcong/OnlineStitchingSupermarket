@@ -1,4 +1,4 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
 import java.util.ArrayList;
 import java.util.List;

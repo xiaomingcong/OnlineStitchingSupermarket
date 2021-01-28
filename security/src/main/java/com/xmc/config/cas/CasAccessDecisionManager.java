@@ -1,5 +1,7 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
+import com.xmc.config.SercurityConstants;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
@@ -18,6 +20,7 @@ import java.util.Iterator;
  * Version 1.0
  */
 @Component
+@Profile("cas")
 public class CasAccessDecisionManager implements AccessDecisionManager {
 
     /**

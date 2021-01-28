@@ -4,17 +4,21 @@ import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
+@EnableWebMvc
 public class WebApplication extends SpringBootServletInitializer{
     public static void main(String[] args) {
         SpringApplication.run(WebApplication.class);
@@ -39,6 +43,7 @@ public class WebApplication extends SpringBootServletInitializer{
                 constraint.setUserConstraint("CONFIDENTIAL");
                 SecurityCollection collection = new SecurityCollection();
                 collection.addPattern("/*");
+                collection.addMethod("*");
                 constraint.addCollection(collection);
                 context.addConstraint(constraint);
             }
@@ -66,6 +71,12 @@ public class WebApplication extends SpringBootServletInitializer{
         StrictHttpFirewall firewall = new StrictHttpFirewall();
         firewall.setAllowSemicolon(true);
         return firewall;
+    }
+
+    @Bean
+    public ServletListenerRegistrationBean<SingleSignOutHttpSessionListener>getBean(){
+        ServletListenerRegistrationBean<SingleSignOutHttpSessionListener> bean = new ServletListenerRegistrationBean<>(new SingleSignOutHttpSessionListener());
+        return bean;
     }
 
 

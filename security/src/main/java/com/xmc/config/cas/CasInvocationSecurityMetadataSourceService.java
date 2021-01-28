@@ -1,8 +1,10 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
+import com.xmc.config.FilterStatic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
@@ -24,6 +26,7 @@ import java.util.regex.Pattern;
  * Version 1.0
  */
 @Component
+@Profile("cas")
 public class CasInvocationSecurityMetadataSourceService implements FilterInvocationSecurityMetadataSource {
     private final TSysMenuDao tSysMenuDao;
     private final HashSet<Pattern> patterns;
@@ -31,7 +34,7 @@ public class CasInvocationSecurityMetadataSourceService implements FilterInvocat
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public CasInvocationSecurityMetadataSourceService(TSysMenuDao tSysMenuDao,FilterStatic filterStatic) {
+    public CasInvocationSecurityMetadataSourceService(TSysMenuDao tSysMenuDao, FilterStatic filterStatic) {
         this.tSysMenuDao = tSysMenuDao;
         patterns = new HashSet<>();
         //可通过配置过滤路径，这里就省略不写了，写法与AcmCasProperties一致

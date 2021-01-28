@@ -1,15 +1,21 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
+import com.xmc.config.FilterStatic;
 import com.xmc.properties.AcmCasProperties;
 import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,8 +34,10 @@ import javax.annotation.Resource;
  */
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)//启用基于注释的安全性,详见官方文档
+@Profile("cas")
 //如果依赖数据库读取角色等，则需要配置
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class CasWebSecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * 自定义动态权限过滤器
      */
@@ -39,7 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private final FilterStatic filterStatic;
 
-    public WebSecurityConfig(CasFilterSecurityInterceptor myFilterSecurityInterceptor, FilterStatic filterStatic) {
+    public CasWebSecurityConfig(CasFilterSecurityInterceptor myFilterSecurityInterceptor, FilterStatic filterStatic) {
         this.myFilterSecurityInterceptor = myFilterSecurityInterceptor;
         this.filterStatic = filterStatic;
     }
@@ -60,7 +68,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // acm cas策略
         // 对logout请求放行
-        http.logout().permitAll();
+        http.logout()
+                .invalidateHttpSession(true).permitAll();
         // 入口
         CasAuthenticationEntryPoint entryPoint = getApplicationContext().getBean(CasAuthenticationEntryPoint.class);
         CasAuthenticationFilter casAuthenticationFilter = getApplicationContext()
@@ -77,6 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class);
         // addFilter
         http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
+
     }
 
 
@@ -88,6 +98,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .getBean("casProvider");
         auth.authenticationProvider(authenticationProvider);
 
+
     }
 
     @Override
@@ -95,7 +106,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // 静态文静过滤
         String[] filter = filterStatic.getStaticFilters().toArray(new String[0]);
         web.ignoring().antMatchers(filter);
+
     }
+
+
 
     /**
      * cas filter类
@@ -114,5 +128,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         casAuthenticationFilter
                 .setAuthenticationSuccessHandler(new SimpleUrlAuthenticationSuccessHandler("/home"));
         return casAuthenticationFilter;
+    }
+
+    @Bean
+    public AuthenticationEventPublisher authenticationEventPublisher
+            (ApplicationEventPublisher applicationEventPublisher) {
+//        AuthenticationEventPublisher authenticationEventPublisher =
+//                new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+//        ((DefaultAuthenticationEventPublisher) authenticationEventPublisher).setDefaultAuthenticationFailureEvent
+//                (GenericAuthenticationFailureEvent.class);
+//        return authenticationEventPublisher;
+        return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
     }
 }

@@ -1,4 +1,4 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
 import org.springframework.security.core.GrantedAuthority;
 

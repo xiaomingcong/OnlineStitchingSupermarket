@@ -1,4 +1,4 @@
-import com.xmc.config.SysUser;
+import com.xmc.config.cas.SysUser;
 
 /**
  * @Description: TODO

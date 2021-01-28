@@ -1,5 +1,6 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
  * Version 1.0
  */
 @Component
+@Profile("cas")
 public class TSysUserDao {
 
     public SysUser findByUserName(String userName){

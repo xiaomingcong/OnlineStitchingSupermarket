@@ -43,6 +43,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -52,55 +55,40 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-//@Configuration
-//@EnableWebSecurity
+@Configuration
+@EnableWebSecurity
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
-//    private AuthenticationManager authenticationManager;
-//    private UserDetailsService userDetailsService;
-//
-//    public SpringSecurityConfig(AuthenticationManager authenticationManager,
-//        UserDetailsService userDetailsService){
-//        this.authenticationManager = authenticationManager;
-//        this.userDetailsService = userDetailsService;
-//    }
 
-//    @Bean
+    @Bean
     public UserDetailsService userDetailsService() {
         // The builder will ensure the passwords are encoded before saving in memory
-//        User.UserBuilder users = User.withDefaultPasswordEncoder();
-//        UserDetails user = users
-//                .username("user")
-//                .password("password")
-//                .roles("USER")
-//                .build();
-//        UserDetails admin = users
-//                .username("admin")
-//                .password("password")
-//                .roles("USER", "ADMIN")
-//                .build();
-//        return new InMemoryUserDetailsManager(user, admin);
-        return new MyUserDetailsService();
+        User.UserBuilder users = User.withDefaultPasswordEncoder();
+        UserDetails user = users
+                .username("user")
+                .password("password")
+                .roles("USER")
+                .build();
+        UserDetails admin = users
+                .username("admin")
+                .password("password")
+                .roles("USER", "ADMIN")
+                .build();
+        return new InMemoryUserDetailsManager(user, admin);
+//        return new MyUserDetailsService();
 
     }
 
 //    @Bean
-//    public ProviderManager myProviderManager(@Autowired MyJdbcAuthenticationProvider provider){
-//        return new MyProviderManager(provider);
-//    }
+    public ProviderManager myProviderManager(@Autowired MyJdbcAuthenticationProvider provider){
+        return new MyProviderManager(provider);
+    }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
+
         super.configure(web);
 
-
-//        SecurityBuilder builder = new SecurityBuilder() {
-//            @Override
-//            public Object build() throws Exception {
-//                return new UsernamePasswordAuthenticationFilter();
-//            }
-//        };
-//        web.addSecurityFilterChainBuilder(builder);
     }
 
     @Override
@@ -111,7 +99,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
+//        http
 //                会话管理
 //                .sessionManagement()
 //                控制最大连接数
@@ -139,80 +127,51 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 //                .anonymous()
 //                .authorities("guest")
 //        .and()
-                .addFilter(casAuthenticationFilter())
+//                .addFilter(casAuthenticationFilter())
 //        .formLogin().loginPage("/login")
         ;
 //                .addFilterBefore(exceptionTranslationFilter(), FilterSecurityInterceptor.class)
 //                .formLogin().disable()
+//        http.authorizeRequests().antMatchers("*/login").permitAll();
+        http.csrf().disable();
+//        http.cors().disable();
+//        http.formLogin().successHandler(authenticationSuccessHandler());
+        http.addFilterAt(usernamePasswordAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class);
+        http.formLogin().disable()
+                .exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("http://localhost:8080"));
 
-
-        http.exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint());
         ;
 
 
-//        super.configure(http);
+        super.configure(http);
     }
 
-//    @Bean("serviceProperties")
-    public ServiceProperties serviceProperties(){
-        ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setService("https://localhost:443");
-        serviceProperties.setSendRenew(false);
-        return serviceProperties;
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurerAdapter() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+//				registry.addMapping("/api/**");
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
+                        .allowCredentials(false).maxAge(3600);
+            }
+        };
     }
 
-//    @Bean
-    public CasAuthenticationEntryPoint casAuthenticationEntryPoint(){
-        CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
-        casAuthenticationEntryPoint.setLoginUrl("http://localhost:8080/cas/login");
-        casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
-        return casAuthenticationEntryPoint;
-    }
 
-//    @Bean
+
+
+    @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         AuthenticationManager authenticationManager  = super.authenticationManager();
         return authenticationManager;
     }
 
-//    @Bean("casFilter")
-    public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
-        CasAuthenticationFilter casAuthenticationFilter = new CasAuthenticationFilter();
-        casAuthenticationFilter.setAuthenticationManager(authenticationManager());
-//        casAuthenticationFilter.setFilterProcessesUrl("/logout");
-        RequestMatcher requestMatcher = new RequestMatcher() {
-            @Override
-            public boolean matches(HttpServletRequest request) {
-                String url = request.getServletPath();
-                if(url.equals("/hello")){
-                    return true;
-                }
-                return false;
-            }
-        };
-        casAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
-//        casAuthenticationFilter.setRequiresAuthenticationRequestMatcher(requestMatcher);
-        return  casAuthenticationFilter;
-    }
 
-//    @Bean
-    public CasAuthenticationProvider casAuthenticationProvider(){
-        CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
-        UserDetailsByNameServiceWrapper userDetailsByNameServiceWrapper = new UserDetailsByNameServiceWrapper(userDetailsService());
-        casAuthenticationProvider.setAuthenticationUserDetailsService(userDetailsByNameServiceWrapper);
-        casAuthenticationProvider.setServiceProperties(serviceProperties());
-        Cas20ServiceTicketValidator cas20ServiceTicketValidator = new Cas20ServiceTicketValidator("http://localhost:8080/cas");
-//        Cas30ServiceTicketValidator Cas30ServiceTicketValidator = new Cas30ServiceTicketValidator();
-        casAuthenticationProvider.setTicketValidator(cas20ServiceTicketValidator);
-        casAuthenticationProvider.setKey("an_id_for_this_auth_provider_only");
-        return casAuthenticationProvider;
-    }
 
-//    @Bean
-    public ExceptionTranslationFilter exceptionTranslationFilter(){
-        ExceptionTranslationFilter exceptionTranslationFilter = new ExceptionTranslationFilter(casAuthenticationEntryPoint());
-        return exceptionTranslationFilter;
-    }
 
 //    @Bean
     public AuthenticationFailureHandler authenticationFailureHandler(){
@@ -222,12 +181,17 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
         return handler;
     }
 
-//    @Bean
+    @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler(){
         return new AuthenticationSuccessHandler() {
+            private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                return ;
+                String url = request.getRequestURL().toString();
+                String path = request.getServletPath();
+                String uri = request.getRequestURI();
+                redirectStrategy.sendRedirect(request, response, "/home");
             }
         };
     }
@@ -244,6 +208,17 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
             saveException(request, exception);
             redirectStrategy.sendRedirect(request, response, "/hello");
         }
+    }
+
+
+
+    @Bean
+    public UsernamePasswordAuthenticationFilter usernamePasswordAuthenticationFilter() throws Exception {
+        UsernamePasswordAuthenticationFilter filter = new UsernamePasswordAuthenticationFilter();
+        filter.setAuthenticationManager(authenticationManager());
+        filter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
+
+        return filter;
     }
 
     //    @Override

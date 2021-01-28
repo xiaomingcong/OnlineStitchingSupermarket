@@ -1,10 +1,11 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
 import com.xmc.properties.AcmCasProperties;
 import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
@@ -22,6 +23,7 @@ import javax.annotation.Resource;
  * Version 1.0
  */
 @Configuration
+@Profile("cas")
 public class AcmCasConfiguration {
     @Resource
     private AcmCasProperties acmCasProperties;

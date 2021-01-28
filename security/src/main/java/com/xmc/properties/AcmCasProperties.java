@@ -2,6 +2,7 @@ package com.xmc.properties;
 
 import com.xmc.utils.LocalIpUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
  * Version 1.0
  */
 @Component
+@Profile("cas")
 public class AcmCasProperties {
     @Value("${cas.server.host.url}")
     private String casServerPrefix;

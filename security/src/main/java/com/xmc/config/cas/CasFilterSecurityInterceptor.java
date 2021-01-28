@@ -1,5 +1,6 @@
-package com.xmc.config;
+package com.xmc.config.cas;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.SecurityMetadataSource;
 import org.springframework.security.access.intercept.AbstractSecurityInterceptor;
@@ -19,6 +20,7 @@ import java.io.IOException;
  * Version 1.0
  */
 @Component
+@Profile("cas")
 public class CasFilterSecurityInterceptor extends AbstractSecurityInterceptor implements Filter {
     @Resource
     private FilterInvocationSecurityMetadataSource securityMetadataSource;
