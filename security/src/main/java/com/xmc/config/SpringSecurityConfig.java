@@ -6,6 +6,7 @@ import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
@@ -86,7 +87,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-
         super.configure(web);
 
     }
@@ -134,6 +134,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 //                .formLogin().disable()
 //        http.authorizeRequests().antMatchers("*/login").permitAll();
         http.csrf().disable();
+//        http.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll();
 //        http.cors().disable();
 //        http.formLogin().successHandler(authenticationSuccessHandler());
         http.addFilterAt(usernamePasswordAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class);
@@ -147,19 +148,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
     }
 
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurerAdapter() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-//				registry.addMapping("/api/**");
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
-                        .allowCredentials(false).maxAge(3600);
-            }
-        };
-    }
+
 
 
 
@@ -188,10 +177,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                String url = request.getRequestURL().toString();
-                String path = request.getServletPath();
-                String uri = request.getRequestURI();
-                redirectStrategy.sendRedirect(request, response, "/home");
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write(authentication.toString());
             }
         };
     }
@@ -206,7 +193,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
             String path = request.getServletPath();
             String uri = request.getRequestURI();
             saveException(request, exception);
-            redirectStrategy.sendRedirect(request, response, "/hello");
+            response.getWriter().write(exception.toString());
         }
     }
 
@@ -220,6 +207,26 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
         return filter;
     }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", buildConfig());
+        return new CorsFilter(source);
+    }
+
+    private CorsConfiguration buildConfig() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        // 1允许任何域名使用
+        corsConfiguration.addAllowedOrigin("*");
+        // 2允许任何头
+        corsConfiguration.addAllowedHeader("*");
+        // 3允许任何方法（post、get等）
+        corsConfiguration.addAllowedMethod("*");
+        return corsConfiguration;
+    }
+
+
 
     //    @Override
 //    protected void configure(HttpSecurity http) throws Exception {

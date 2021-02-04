@@ -2,6 +2,7 @@ package com.xmc.rest;
 
 import com.alibaba.fastjson.JSON;
 import com.xmc.dao.GoodsRepository;
+import com.xmc.dao.UserRepository;
 import com.xmc.domain.Goods;
 import com.xmc.utils.HTTPClientUtils;
 import com.xmc.utils.SSLClient;
@@ -37,6 +38,10 @@ import java.util.HashMap;
 @RestController
 public class HelloController {
 
+    @Autowired
+    UserRepository userRepository;
+
+
     @ApiOperation(value = "hello")
     @GetMapping("/hello")
     public String Hello(){
@@ -55,6 +60,7 @@ public class HelloController {
 //        return "hello";
 //    }
 
+    @CrossOrigin
     @ApiOperation(value="home")
     @GetMapping("/home")
     public String home(){
